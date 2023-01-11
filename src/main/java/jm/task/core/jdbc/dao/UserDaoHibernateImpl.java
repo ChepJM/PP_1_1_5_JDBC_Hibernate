@@ -23,68 +23,89 @@ public class UserDaoHibernateImpl implements UserDao {
                 "    age INT," +
                 "    PRIMARY KEY (id)" +
                 ")";
-        Session session = Util.getSessionFactory().openSession();
-        session.beginTransaction();
-        session.createSQLQuery(query).executeUpdate();
-        session.getTransaction().commit();
-        session.close();
+        try (Session session = Util.getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.createSQLQuery(query).executeUpdate();
+            session.getTransaction().commit();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void dropUsersTable() {
         String query = "DROP TABLE IF EXISTS User";
-        Session session = Util.getSessionFactory().openSession();
-        session.beginTransaction();
-        session.createSQLQuery(query).executeUpdate();
-        session.getTransaction().commit();
-        session.close();
+        try (Session session = Util.getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.createSQLQuery(query).executeUpdate();
+            session.getTransaction().commit();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        Session session = Util.getSessionFactory().openSession();
-        session.beginTransaction();
+        Session session = null;
+        try {
+            session = Util.getSessionFactory().openSession();
+            session.beginTransaction();
 
-        User user = new User(name, lastName, age);
-        session.save(user);
+            User user = new User(name, lastName, age);
+            session.save(user);
 
-        session.getTransaction().commit();
-        session.close();
+            session.getTransaction().commit();
+        } catch (RuntimeException e) {
+            session.getTransaction().rollback();
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void removeUserById(long id) {
-        Session session = Util.getSessionFactory().openSession();
-        session.beginTransaction();
+        Session session = null;
+        try {
+            session = Util.getSessionFactory().openSession();
+            session.beginTransaction();
 
-        User user = session.get(User.class, id);
-        session.delete(user);
+            User user = session.get(User.class, id);
+            session.delete(user);
 
-        session.getTransaction().commit();
-        session.close();
+            session.getTransaction().commit();
+        } catch (RuntimeException e) {
+            session.getTransaction().rollback();
+            e.printStackTrace();
+        }
     }
 
     @Override
     public List<User> getAllUsers() {
         List<User> users = null;
-        Session session = Util.getSessionFactory().openSession();
-        session.beginTransaction();
+        try (Session session = Util.getSessionFactory().openSession()) {
+            session.beginTransaction();
 
-        users = session.createQuery("FROM User").getResultList();
+            users = session.createQuery("FROM User").getResultList();
 
-        session.getTransaction().commit();
-        session.close();
+            session.getTransaction().commit();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
         return users;
     }
 
     @Override
     public void cleanUsersTable() {
-        Session session = Util.getSessionFactory().openSession();
-        session.beginTransaction();
+        Session session = null;
+        try {
+            session = Util.getSessionFactory().openSession();
+            session.beginTransaction();
 
-        session.createQuery("DELETE User").executeUpdate();
+            session.createQuery("DELETE User").executeUpdate();
 
-        session.getTransaction().commit();
-        session.close();
+            session.getTransaction().commit();
+        } catch (RuntimeException e) {
+            session.getTransaction().rollback();
+            e.printStackTrace();
+        }
     }
 }
