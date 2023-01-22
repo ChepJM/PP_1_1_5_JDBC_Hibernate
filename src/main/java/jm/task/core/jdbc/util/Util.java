@@ -19,6 +19,11 @@ public class Util {
     private static final String DB_PASSWORD = "toor";
     private static final String DB_DIALECT  = "org.hibernate.dialect.MySQLDialect";
     private static SessionFactory sessionFactory;
+
+    private Util() {
+
+    }
+
     public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             try {
